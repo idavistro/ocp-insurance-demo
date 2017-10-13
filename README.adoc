@@ -1,28 +1,32 @@
-## Install CICD Tools using Ansible
+## Install Insurance Demo on Openshift Container Platform using Ansible
 
-link:https://www.ansible.com/[Ansible] can be used to automate the installation process to setup cicd tools in Openshift.
+link:https://www.ansible.com/[Ansible] can be used to automate the installation process to setup 'Insurance Demo' on Openshift.
 
 Make sure you have the following requirements installed:
 
 - Git
 - Ansible 1.9+
+- Gogs link:https://github.com/mikeintoch/openshift-cicd-tools.git/[CI/CD Tools]
+- Nexus link:https://github.com/mikeintoch/openshift-cicd-tools.git/[CI/CD Tools]
 
 And run the following commands:
 
 ----
-$ git clone https://github.com/mikeintoch/openshift-cicd-tools.git
-$ cd openshift-cicd-tools/
+$ git clone https://github.com/mikeintoch/ocp-insurance-demo
+$ cd ocp-insurance-demo
 ----
 
-First, *edit the vars.yaml file* to define the *'openshift_console'*, *'domain'* variables and set the admin console and provide subdomain for your openshift installation.
+First, *edit the vars.yaml file* to define the *'openshift_console'*, *'domain'*, *'user'*, *'password'*, *'Gogs Data'* and *'Nexus data'*  information to install the *'Insurance Demo'*
 
 Then execute:
 
 ----
-$ ansible-playbook cicd.yaml
+$ ansible-playbook insurance.yaml
 ----
 
 The playbook install the next tools:
 
-- Nexus 3
-- Gogs
+- Cloning projects from github to gogs.
+- Create insurance openshift project.
+- Create and configure build config on Openshift.
+- Create and expose services on Openshift.
