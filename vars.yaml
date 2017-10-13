@@ -1,0 +1,24 @@
+---
+#UNCOMMENT Define the Openshift host:port address
+openshift_console: 192.168.42.19:8443
+
+#UNCOMMENT Customize rhe domain of the project
+domain: 192.168.42.19.nip.io
+
+#Your Openshift credentials
+username: developer
+password: developer
+
+#Define the name of the Openshift project
+project_name: insurance
+
+#Define gogs configuration
+gogs_hostname: http://gogs-cicd.192.168.42.19.nip.io
+gogs_admin_user: gogs
+gogs_admin_password: gogs
+
+#Define insurance project
+project_name: insurance
+
+#Define nexus MAVEN_MIRROR_URL
+nexus_mirror_url: http://nexus-cicd.192.168.42.19.nip.io/repository/redhat-group/

@@ -1,0 +1,156 @@
+---
+- name: Setup Gogs.
+  hosts: localhost
+  vars_files:
+    - vars.yaml
+  tasks:
+
+    - name: Getting json files to add.
+      find:
+        paths: resources/
+        patterns: '*.json'
+      register: repos_to_add
+      tags:
+        - gogs
+
+    - name: Migrating repositories to Openshift Gogs.
+      shell: "curl -o /dev/null -vL -w \"%{http_code}\" -H \"Content-Type: application/json\" -u {{ gogs_admin_user }}:{{ gogs_admin_password }} -X POST {{ gogs_hostname }}/api/v1/repos/migrate -d @\"{{ item.path }}\""
+      register: command_result
+      with_items: "{{ repos_to_add.files }}"
+      tags:
+        - gogs
+
+- name: Installing applications from insurance demo.
+  hosts: localhost
+  vars_files:
+    - vars.yaml
+  tasks:
+    - name: Login in OpenShift as {{ username }}
+      shell: "oc login --insecure-skip-tls-verify=true -u {{ username }} -p {{ password }} {{ openshift_console }}"
+      tags:
+        - openshift
+
+    - name: Create a new insurance Project
+      shell: "oc new-project {{ project_name }} --display-name=\"Insurance Demo\" --description=\"Insurance Demo\""
+      register: command_result
+      failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
+      changed_when: "'exists' not in command_result.stderr"
+      tags:
+        - openshift
+
+    - name: Define project = {{ project_name }}
+      shell: "oc project {{ project_name }}"
+      tags:
+        - openshift
+
+    - name: Installing FRONTEND application.
+      shell: "oc new-app --image-stream=jboss-eap64-openshift:latest --name=frontend --code={{ gogs_hostname }}/gogs/frontend-insurance.git \
+              --build-env MAVEN_MIRROR_URL={{ nexus_mirror_url }}"
+      register: command_result
+      failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
+      changed_when: "'exists' not in command_result.stderr"
+      tags:
+        - openshift
+        - insurance
+
+    - name: Exposing Service FRONTEND application.
+      shell: "oc expose svc frontend --hostname=frontend.{{ domain }}"
+      register: command_result
+      failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
+      changed_when: "'exists' not in command_result.stderr"
+      tags:
+        - openshift
+        - insurance
+
+    - name: Installing MARCAS application.
+      shell: "oc new-app --image-stream=jboss-eap64-openshift:latest --name=marcas --code={{ gogs_hostname }}/gogs/catalog-marcas-service.git \
+              --build-env MAVEN_MIRROR_URL={{ nexus_mirror_url }}"
+      register: command_result
+      failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
+      changed_when: "'exists' not in command_result.stderr"
+      tags:
+        - openshift
+        - insurance
+
+    - name: Exposing Service MARCAS application.
+      shell: "oc expose svc marcas --hostname=marcas.{{ domain }}"
+      register: command_result
+      failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
+      changed_when: "'exists' not in command_result.stderr"
+      tags:
+        - openshift
+        - insurance
+
+    - name: Installing RULES application.
+      shell: "oc new-app --image-stream=jboss-decisionserver63-openshift:latest --name=rules --code={{ gogs_hostname }}/gogs/insurance-rules.git \
+              --context-dir=carinsuranceagency --build-env MAVEN_MIRROR_URL={{ nexus_mirror_url }}"
+      register: command_result
+      failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
+      changed_when: "'exists' not in command_result.stderr"
+      tags:
+        - openshift
+        - insurance
+
+    - name: Exposing Service RULES application.
+      shell: "oc expose svc rules --hostname=rules.{{ domain }}"
+      register: command_result
+      failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
+      changed_when: "'exists' not in command_result.stderr"
+      tags:
+        - openshift
+        - insurance
+
+    - name: Installing PDF application.
+      shell: "oc new-app --image-stream=jboss-eap64-openshift:latest --name=pdf --code={{ gogs_hostname }}/gogs/pdf-service.git \
+              --build-env MAVEN_MIRROR_URL={{ nexus_mirror_url }}"
+      register: command_result
+      failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
+      changed_when: "'exists' not in command_result.stderr"
+      tags:
+        - openshift
+        - insurance
+
+    - name: Exposing Service PDF application.
+      shell: "oc expose svc pdf --hostname=pdf.{{ domain }}"
+      register: command_result
+      failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
+      changed_when: "'exists' not in command_result.stderr"
+      tags:
+        - openshift
+        - insurance
+
+    - name: Installing FIS application.
+      shell: "oc new-app --image-stream=fis-karaf-openshift:latest --name=fis --code={{ gogs_hostname }}/gogs/fuse-brms-service.git --build-env MAVEN_ARGS=\"-DMVN_MIRROR={{ nexus_mirror_url }}\" --env BRMS_HOST_SERVICE=rules.{{ domain }}"
+      register: command_result
+      failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
+      changed_when: "'exists' not in command_result.stderr"
+      tags:
+        - openshift
+        - insurance
+
+    - name: Exposing Service FIS application.
+      shell: "oc expose svc fis --hostname=fis.{{ domain }}"
+      register: command_result
+      failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
+      changed_when: "'exists' not in command_result.stderr"
+      tags:
+        - openshift
+        - insurance
+
+    - name: Installing CREDITCARD application.
+      shell: "oc new-app --image-stream=fis-karaf-openshift:latest --name=creditcard --code={{ gogs_hostname }}/gogs/creditcard-service.git"
+      register: command_result
+      failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
+      changed_when: "'exists' not in command_result.stderr"
+      tags:
+        - openshift
+        - insurance
+
+    - name: Exposing Service CREDITCARD application.
+      shell: "oc expose svc creditcard --hostname=creditcard.{{ domain }}"
+      register: command_result
+      failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
+      changed_when: "'exists' not in command_result.stderr"
+      tags:
+        - openshift
+        - insurance
