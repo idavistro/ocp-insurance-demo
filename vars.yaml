@@ -17,6 +17,9 @@ gogs_hostname: http://gogs-cicd.192.168.42.19.nip.io
 gogs_admin_user: gogs
 gogs_admin_password: gogs
 
+#Define insurance repository
+insurance_repository: "{{ gogs_hostname }}/gogs/insurance-demo.git"
+
 #Define insurance project
 project_name: insurance
 

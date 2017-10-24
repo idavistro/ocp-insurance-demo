@@ -44,8 +44,8 @@
         - openshift
 
     - name: Installing FRONTEND application.
-      shell: "oc new-app --image-stream=jboss-eap64-openshift:latest --name=frontend --code={{ gogs_hostname }}/gogs/frontend-insurance.git \
-              --build-env MAVEN_MIRROR_URL={{ nexus_mirror_url }}"
+      shell: "oc new-app --image-stream=jboss-eap64-openshift:latest --name=frontend --code={{ insurance_repository }} \
+              --context-dir=frontend-insurance --build-env MAVEN_MIRROR_URL={{ nexus_mirror_url }}"
       register: command_result
       failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
       changed_when: "'exists' not in command_result.stderr"
@@ -63,8 +63,8 @@
         - insurance
 
     - name: Installing MARCAS application.
-      shell: "oc new-app --image-stream=jboss-eap64-openshift:latest --name=marcas --code={{ gogs_hostname }}/gogs/catalog-marcas-service.git \
-              --build-env MAVEN_MIRROR_URL={{ nexus_mirror_url }}"
+      shell: "oc new-app --image-stream=jboss-eap64-openshift:latest --name=marcas --code={{ insurance_repository }} \
+              --context-dir=catalog-marcas-service --build-env MAVEN_MIRROR_URL={{ nexus_mirror_url }}"
       register: command_result
       failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
       changed_when: "'exists' not in command_result.stderr"
@@ -82,8 +82,8 @@
         - insurance
 
     - name: Installing RULES application.
-      shell: "oc new-app --image-stream=jboss-decisionserver63-openshift:latest --name=rules --code={{ gogs_hostname }}/gogs/insurance-rules.git \
-              --context-dir=carinsuranceagency --build-env MAVEN_MIRROR_URL={{ nexus_mirror_url }}"
+      shell: "oc new-app --image-stream=jboss-decisionserver63-openshift:latest --name=rules --code={{ insurance_repository }} \
+              --context-dir=insurance-rules/carinsuranceagency --build-env MAVEN_MIRROR_URL={{ nexus_mirror_url }}"
       register: command_result
       failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
       changed_when: "'exists' not in command_result.stderr"
@@ -101,8 +101,8 @@
         - insurance
 
     - name: Installing PDF application.
-      shell: "oc new-app --image-stream=jboss-eap64-openshift:latest --name=pdf --code={{ gogs_hostname }}/gogs/pdf-service.git \
-              --build-env MAVEN_MIRROR_URL={{ nexus_mirror_url }}"
+      shell: "oc new-app --image-stream=jboss-eap64-openshift:latest --name=pdf --code={{ insurance_repository }} \
+              --context-dir=pdf-service --build-env MAVEN_MIRROR_URL={{ nexus_mirror_url }}"
       register: command_result
       failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
       changed_when: "'exists' not in command_result.stderr"
