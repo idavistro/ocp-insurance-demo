@@ -120,7 +120,8 @@
         - insurance
 
     - name: Installing FIS application.
-      shell: "oc new-app --image-stream=fis-karaf-openshift:latest --name=fis --code={{ gogs_hostname }}/gogs/insurance-fis-brms-service.git --env BRMS_SERVICE_HOST=rules.{{ domain }}"
+      shell: "oc new-app --image-stream=fis-java-openshift:latest --name=fis --code={{ gogs_hostname }}/gogs/insurance-fis-brms-service.git \
+             --env BRMS_SERVICE_HOST=rules.{{ domain }} --build-env MAVEN_MIRROR_URL={{ nexus_mirror_url }}"
       register: command_result
       failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
       changed_when: "'exists' not in command_result.stderr"
@@ -129,7 +130,7 @@
         - insurance
 
     - name: Exposing Service FIS application.
-      shell: "oc expose svc fis --hostname=fis.{{ domain }}"
+      shell: "oc expose svc fis --hostname=fis.{{ domain }} --port=9090"
       register: command_result
       failed_when: "'exists' not in command_result.stderr and command_result.rc != 0"
       changed_when: "'exists' not in command_result.stderr"
